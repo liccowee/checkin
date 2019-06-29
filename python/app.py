@@ -9,22 +9,42 @@ class User:
     phone = ""
     id = ""
 
+class Response:
+    def __init__(self, success):
+        self.success = success
+
 @app.route('/example')
 def hello():
     return "Hello World!"
+
+@app.route('/register/<name>/<phone>')
+def register(name, phone):
+    client = MongoClient('mongo', 27017)
+    db = client.data
+    db.user.insert_one({
+        "name": name,
+        "phone": phone
+        })
+    client.close()
+    response = Response(True)
+    json_projects = json.dumps(response.__dict__, default=lambda o: o.__dict__, indent=4)
+    return json_projects
 
 @app.route("/db")
 def checkDatabase():
     client = MongoClient('mongo', 27017)
     db = client.data
     collection = db.user
-    findUser = collection.find_one()
-    user = User()
-    user.name = findUser['name']
-    user.phone = findUser['phone']
-    user.id = str(findUser['_id'])
+    findUser = collection.find()
     json_projects = []
-    json_projects = json.dumps(user.__dict__, default=lambda o: o.__dict__, indent=4)
+    for u in findUser:
+        user = User()
+        user.name = u['name']
+        user.phone = u['phone']
+        user.id = str(u['_id'])
+        json_projects.append(user)
+    
+    json_projects = json.dumps(json_projects, default=lambda o: o.__dict__, indent=4)
     client.close()
     return json_projects
 

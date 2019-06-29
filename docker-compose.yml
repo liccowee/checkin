@@ -5,7 +5,7 @@ services:
     build: .
     container_name: checkinweb
     ports:
-      - "80:3000"
+      - "1000:3000"
   backend:
     build: python
     container_name: checkinbackend
